@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${DOCKER_USERNAME}/nodejs-backend:latest  # Thay DOCKER_USERNAME bằng username Docker Hub của bạn
+    container_name: nodejs-backend-container
+    environment:
+      - NODE_ENV=Production
+      - PORT=3000
+      - DATABASE_URL=${DB_CONNECTION_STRING}  # Nếu dùng database
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  app-network:
+    driver: bridge
