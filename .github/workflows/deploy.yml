@@ -50,9 +50,8 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
         run: |
-          docker-compose -f docker-compose.yml build \
-            --build-arg BUILDKIT_INLINE_CACHE=1
-          docker-compose -f docker-compose.yml push backend
+            docker build -t ${{ secrets.DOCKER_USERNAME }}/my-nodejs-app:latest .
+            docker push ${{ secrets.DOCKER_USERNAME }}/my-nodejs-app:latest
         continue-on-error: false
 
       - name: Deploy to production server
