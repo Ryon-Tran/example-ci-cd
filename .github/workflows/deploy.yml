@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -52,32 +52,3 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/my-nodejs-app:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
-
-      # 6. Deploy to VPS via SSH
-      - name: Deploy to production server
-        uses: appleboy/ssh-action@v1.0.3
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd ~/my-nodejs-project || mkdir -p ~/my-nodejs-project && cd ~/my-nodejs-project
-
-            # Copy docker-compose.yml từ repo về (chỉ 1 lần đầu)
-            if [ ! -f docker-compose.yml ]; then
-              echo "Copy docker-compose.yml lần đầu"
-              exit 1  # hoặc anh scp file này từ repo xuống server
-            fi
-
-            # Login Docker Hub
-            echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
-
-            # Pull & restart containers
-            docker-compose pull
-            docker-compose up -d --remove-orphans
-
-            # Cleanup
-            docker image prune -f
